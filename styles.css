@@ -212,3 +212,34 @@ body {
   border: none;
   vertical-align: top;
 }
+.project-link {
+  display: inline-block;
+  position: relative;
+  text-decoration: none;
+}
+.project-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 16px;
+  object-fit: cover;
+  filter: brightness(0.85);
+}
+.project-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 16px;
+  text-align: center;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 0;
+  border-radius: 0 0 16px 16px;
+}
+#project-block {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
