@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="styles.css" />
+    <title>About Me - Conal Kelly</title>
+  </head>
+  <body>
+    <div id="container">
+      <nav id="sidebar">
+        <ul>
+          <li>
+            <a href="index.html" class="nav-link">
+              <span class="icon">Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="about.html" class="nav-link active">
+              <span class="icon">About Me</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://github.com/conalkelly1"
+              target="_blank"
+              class="nav-link"
+            >
+              <span class="icon">Github</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.linkedin.com/in/conal-kelly-a8ab49156/"
+              target="_blank"
+              class="nav-link"
+            >
+              <span class="icon">LinkedIn</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div id="main-content">
+        <div id="profile-block">
+          <div id="photos" class="photo-container">
+            <img src="images/Myself.jpg" alt="Picture of Me :)" class="image" />
+            <div class="middle">
+              <div class="text">
+                <a href="files/CV-ConalKelly.pdf" target="_blank">
+                  Conal Kelly
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="header-text">
+            <h1 class="OpeningHeader">Conal Kelly - Quality Engineer</h1>
+            <h2 class="SecondaryHeader">
+              Training to become a developer! Check out my Work below!
+            </h2>
+          </div>
+        </div>
+        <div id="Qualifications" class="info-section">
+          <h2 class="info-header">About Me</h2>
+          <h3>Education</h3>
+          <p class="UniGrade" id="about-education"></p>
+          <h3>Job Experience</h3>
+          <p class="UniGrade" id="about-job"></p>
+          <h3>Skills</h3>
+          <div class="UniGrade" id="about-skills"></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      fetch("files/aboutMe.json")
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById("about-education").textContent =
+            data.education;
+          document.getElementById("about-job").textContent = data.jobExperience;
+          // Render skills table as horizontal headers with bullets below
+          const skillsTable = data.skillsTable;
+          const skillsContainer = document.getElementById("about-skills");
+          let html =
+            '<table id="skills-table" style="width:100%; border-collapse:collapse;">';
+          // Table headers
+          html += "<tr>";
+          skillsTable.forEach((section) => {
+            html += `<th style='text-align:left; padding:6px 4px; background:#e0e0e0; color:#222; font-size:1rem;'>${section.category}</th>`;
+          });
+          html += "</tr>";
+          // Find max number of items in any category
+          const maxRows = Math.max(
+            ...skillsTable.map((section) => section.items.length)
+          );
+          // Table rows
+          for (let i = 0; i < maxRows; i++) {
+            html += "<tr>";
+            skillsTable.forEach((section) => {
+              const item = section.items[i] ? `• ${section.items[i]}` : "";
+              html += `<td style='padding:4px 8px 4px 24px; color:#333; font-size:0.95rem; vertical-align:top;'>${item}</td>`;
+            });
+            html += "</tr>";
+          }
+          html += "</table>";
+          skillsContainer.innerHTML = html;
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "education": "I started out at St Joseph’s Secondary School in Derry, where I developed a real interest in tech through subjects like I.T., Maths, and Science. Those early experiences gave me a solid foundation and set me on the path toward a career in computing.\n\nFrom there, I began studying Computer Science remotely with the University of Hertfordshire, working toward a CertHE. I consistently achieved first-class results and really built up my confidence with core concepts like programming, systems design, and problem-solving. The course was unfortunately cut short when HLA Management at Deloitte moved us to a different provider, but it gave me a strong technical base to build on.\n\nI then completed a BSc in Computing Systems at the University of Ulster, graduating with a 2:1. Over four years, I developed proficiency in areas such as software engineering, database systems, cloud infrastructure, and cybersecurity. The degree combined hands-on projects with theoretical modules, equipping me with the tools and mindset to tackle complex technical challenges. I graduated confident in both my practical skills and my ability to learn and adapt in a fast-evolving field.",
+  "jobExperience": "Worked as a Quality Engineer at XYZ Corp for 2 years, focusing on automation and process improvement.",
+  "skillsTable": [
+    {
+      "category": "Programming Languages",
+      "items": ["JavaScript", "TypeScript", "C#", "Python"]
+    },
+    {
+      "category": "Test Automation & Frameworks",
+      "items": ["Playwright", "Cypress", "WireMock"]
+    },
+    {
+      "category": "CI/CD & DevOps",
+      "items": ["Jenkins", "Docker", "CI/CD pipelines"]
+    },
+    {
+      "category": "Cloud & Infrastructure",
+      "items": ["AWS (EC2, S3, Lambda)"]
+    },
+    {
+      "category": "Monitoring & Observability",
+      "items": ["Synthetic testing with Datadog", "Grafana"]
+    }
+  ]
+}

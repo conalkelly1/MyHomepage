@@ -1,31 +1,115 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" href="styles.css">
-        <title>Welcome to My Webpage</title>
-    </head>
-    <body>
-        <div id="container">
-            <header></header>
-            <div id="info">
-                <h1 class="OpeningHeader">Conal Kelly - Quality Engineer</h1>
-                <h2 class="SecondaryHeader">Training to become a developer! Check out my Work below!</h2>
-                <button class="button button1" onClick="window.open('https://github.com/conalkelly1');">
-                    <span class="icon">Github</span>
-               </button>
-               <button class="button button2" onClick="window.open('https://www.linkedin.com/in/conal-kelly-a8ab49156/');">
-                <span class="icon">LinkedIn</span>
-           </button>
-            </div>  <!--Info Div-->
-            <div id="photos" class="container">
-                <img src="images/Myself.jpg" alt="Picture of Me :)" class="image">
-                <div class="middle">
-                    <div class="text">Conal Kelly</div>
-                  </div>
-            </div> <!--Photos Div-->
-            <div id="Qualifications">
-                <p class="UniGrade">Achieved a 2:1 Bsc in Computer Science at Ulster University</p>
-            </div><!--Qualfications Div-->
+  <head>
+    <link rel="stylesheet" href="styles.css" />
+    <title>Welcome to My Webpage</title>
+  </head>
+  <body>
+    <div id="container">
+      <nav id="sidebar">
+        <ul>
+          <li>
+            <a href="index.html" class="nav-link">
+              <span class="icon">Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="about.html" class="nav-link">
+              <span class="icon">About Me</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://github.com/conalkelly1"
+              target="_blank"
+              class="nav-link"
+            >
+              <span class="icon">Github</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.linkedin.com/in/conal-kelly-a8ab49156/"
+              target="_blank"
+              class="nav-link"
+            >
+              <span class="icon">LinkedIn</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div id="main-content">
+        <div id="profile-block">
+          <div id="photos" class="photo-container">
+            <img src="images/Myself.jpg" alt="Picture of Me :)" class="image" />
+            <div class="middle">
+              <div class="text">
+                <a href="files/CV-ConalKelly.pdf" target="_blank">
+                  Conal Kelly
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="header-text">
+            <h1 class="OpeningHeader">Conal Kelly - Quality Engineer</h1>
+            <h2 class="SecondaryHeader">
+              Training to become a developer! Check out my Work below!
+            </h2>
+          </div>
         </div>
-    </body>
+        <div
+          id="project-block"
+          style="
+            margin-top: 32px;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+          "
+        >
+          <a
+            href="#"
+            id="wordle-project-link"
+            style="
+              display: inline-block;
+              position: relative;
+              text-decoration: none;
+            "
+          >
+            <img
+              src="images/WordlePic.JPG"
+              alt="Wordle Project"
+              class="image"
+              style="
+                width: 200px;
+                height: 200px;
+                border-radius: 16px;
+                object-fit: cover;
+                filter: brightness(0.85);
+              "
+            />
+            <span
+              style="
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 16px;
+                text-align: center;
+                color: #fff;
+                font-size: 1.2rem;
+                font-weight: bold;
+                background: rgba(0, 0, 0, 0.5);
+                padding: 8px 0;
+                border-radius: 0 0 16px 16px;
+              "
+              >Wordle Project</span
+            >
+          </a>
+        </div>
+        <!--Qualfications Div-->
+      </div>
+    </div>
+    <script>
+      // ...existing code...
+    </script>
+  </body>
 </html>
