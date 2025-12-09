@@ -156,6 +156,10 @@ body {
   background: #444;
   color: #ff9800;
 }
+#sidebar .nav-link.active {
+  background: #ff9800;
+  color: #222;
+}
 #main-content {
   margin-left: 200px;
   padding: 32px 24px;
