@@ -16,6 +16,24 @@ let pipeTimeout; // store the next scheduled pipe
 // On page load, set bird to middle but don't move until game starts
 bird.style.top = "400px";
 
+// Remove old inner elements if any
+bird.innerHTML = "";
+
+// Add beak
+const beak = document.createElement("div");
+beak.className = "beak";
+bird.appendChild(beak);
+
+// Add eye
+const eye = document.createElement("div");
+eye.className = "eye";
+bird.appendChild(eye);
+
+// Add wing
+const wing = document.createElement("div");
+wing.className = "wing";
+bird.appendChild(wing);
+
 // Show prompt to start game
 const promptDiv = document.createElement("div");
 promptDiv.textContent = "Press SPACE to start!";
