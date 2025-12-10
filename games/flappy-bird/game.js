@@ -136,19 +136,26 @@ function updateScoreDisplay() {
 
 document.addEventListener("keydown", function (event) {
   if (event.code === "Space") {
-    if (!gameStarted) {
-      startGame();
-      gameLoop();
-    } else if (gameOver) {
-      hideRestartPrompt();
-      startGame();
-      gameLoop();
-    } else {
-      velocity = jumpForce;
-      bird.style.transform = "rotate(-25deg)";
-    }
+    handleJump();
   }
 });
+
+document.addEventListener("click", handleJump);
+document.addEventListener("touchstart", handleJump);
+
+function handleJump() {
+  if (!gameStarted) {
+    startGame();
+    gameLoop();
+  } else if (gameOver) {
+    hideRestartPrompt();
+    startGame();
+    gameLoop();
+  } else {
+    velocity = jumpForce;
+    bird.style.transform = "rotate(-25deg)";
+  }
+}
 
 function gameLoop() {
   if (!gameOver && gameStarted) {
