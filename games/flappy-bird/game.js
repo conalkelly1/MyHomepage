@@ -15,6 +15,7 @@ let pipeTimeout; // store the next scheduled pipe
 
 // On page load, set bird to middle but don't move until game starts
 bird.style.top = "400px";
+bird.style.left = "280px";
 
 // Remove old inner elements if any
 bird.innerHTML = "";
@@ -42,7 +43,12 @@ document.getElementById("game").appendChild(promptDiv);
 
 function startGame() {
   // Remove all pipes from previous game
-  document.querySelectorAll('.pipe').forEach(pipe => pipe.remove());
+  document.querySelectorAll('.pipe, .pipe-end').forEach(p => p.remove());
+
+  const game = document.getElementById("game");
+  game.style.display = "none";
+  void game.offsetHeight; // force reflow
+  game.style.display = "block";
 
   // Cancel any previously scheduled pipes
   if (pipeTimeout) clearTimeout(pipeTimeout);
@@ -139,6 +145,7 @@ document.addEventListener("keydown", function (event) {
       gameLoop();
     } else {
       velocity = jumpForce;
+      bird.style.transform = "rotate(-25deg)";
     }
   }
 });
@@ -148,6 +155,12 @@ function gameLoop() {
     velocity += gravity;
     let birdY = bird.offsetTop + velocity;
     bird.style.top = birdY + "px";
+
+    let angle = velocity * 4;           // scale tilt from velocity
+    angle = Math.max(-25, angle);       // cap upward tilt
+    angle = Math.min(90, angle);        // cap downward tilt
+    bird.style.transform = `rotate(${angle}deg)`;
+
     // Prevent bird from going off screen
     if (birdY < 0) {
       bird.style.top = "0px";
@@ -179,6 +192,8 @@ function createPipe() {
 
   pipeTop.className = "pipe pipe-top";
   pipeBottom.className = "pipe pipe-bottom";
+  pipeTopEnd.className = "pipe-end";
+pipeBottomEnd.className = "pipe-end";
   pipeTop.style.position = "absolute";
   pipeBottom.style.position = "absolute";
   pipeTopEnd.style.position = "absolute";
@@ -228,14 +243,20 @@ function createPipe() {
   let pipeX = 600;
   let scored = false;
 
-  function movePipe() {
-    if (gameOver) return;
+function movePipe() {
+  if (gameOver) {
+    pipeTop.remove();
+    pipeBottom.remove();
+    pipeTopEnd.remove();
+    pipeBottomEnd.remove();
+    return;
+  }
 
-    pipeX -= 2;
-    pipeTop.style.left = pipeX + "px";
-    pipeBottom.style.left = pipeX + "px";
-    pipeTopEnd.style.left = (pipeX - capExtraWidth / 2) + "px";
-    pipeBottomEnd.style.left = (pipeX - capExtraWidth / 2) + "px";
+  pipeX -= 2;
+  pipeTop.style.left = pipeX + "px";
+  pipeBottom.style.left = pipeX + "px";
+  pipeTopEnd.style.left = (pipeX - capExtraWidth / 2) + "px";
+  pipeBottomEnd.style.left = (pipeX - capExtraWidth / 2) + "px";
 
     // Collision check
     const birdRect = bird.getBoundingClientRect();
