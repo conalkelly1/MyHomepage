@@ -5,6 +5,13 @@ let velocity = 0;
 let gravity = 0.5;
 let jumpForce = -10;
 let gameStarted = false;
+let baseGap = 300;            // starting gap
+let basePipeInterval = 2500;  // starting spawn rate
+let pipeIntervalSpeed = 2500; // starting pipe interval
+let minPipeInterval = 1000;   // fastest pipe spawn
+let gap = 300;                 // starting pipe gap
+let minGap = 150; 
+let pipeTimeout; // store the next scheduled pipe
 
 // On page load, set bird to middle but don't move until game starts
 bird.style.top = "400px";
@@ -18,6 +25,11 @@ document.getElementById("game").appendChild(promptDiv);
 function startGame() {
   // Remove all pipes from previous game
   document.querySelectorAll('.pipe').forEach(pipe => pipe.remove());
+
+  // Cancel any previously scheduled pipes
+  if (pipeTimeout) clearTimeout(pipeTimeout);
+
+  // Reset bird and game state
   bird.style.background = "yellow";
   gameOver = false;
   score = 0;
@@ -26,10 +38,15 @@ function startGame() {
   updateScoreDisplay();
   gameStarted = true;
   promptDiv.style.display = "none";
-  // Start pipe interval
-  if (window.pipeInterval) clearInterval(window.pipeInterval);
-  window.pipeInterval = setInterval(createPipe, 2500);
+
+  // Reset difficulty settings
+  pipeIntervalSpeed = basePipeInterval; // reset pipe interval
+  gap = baseGap;                        // reset gap
+
+  // Start spawning pipes recursively
+  scheduleNextPipe();
 }
+
 
 function endGame() {
   gameOver = true;
@@ -59,8 +76,18 @@ function updateScore() {
   if (!gameOver && gameStarted) {
     score++;
     updateScoreDisplay();
+
+    // Every 3 points → increase difficulty
+    if (score % 3 === 0) {
+      // Shrink gap
+      gap = Math.max(minGap, gap - 30);
+
+      // Faster pipe spawning
+      pipeIntervalSpeed = Math.max(minPipeInterval, pipeIntervalSpeed - 150);
+    }
   }
 }
+
 
 function updateScoreDisplay() {
   let scoreDiv = document.getElementById("score-div");
@@ -116,55 +143,81 @@ function gameLoop() {
   }
 }
 
+function scheduleNextPipe() {
+  if (gameOver) return;
+  createPipe();
+  pipeTimeout = setTimeout(scheduleNextPipe, pipeIntervalSpeed);
+}
+
+
 function createPipe() {
   const game = document.getElementById("game");
 
   // Create elements
   const pipeTop = document.createElement("div");
   const pipeBottom = document.createElement("div");
+  const pipeTopEnd = document.createElement("div");    // top pipe cap
+  const pipeBottomEnd = document.createElement("div"); // bottom pipe cap
+
   pipeTop.className = "pipe pipe-top";
   pipeBottom.className = "pipe pipe-bottom";
   pipeTop.style.position = "absolute";
   pipeBottom.style.position = "absolute";
+  pipeTopEnd.style.position = "absolute";
+  pipeBottomEnd.style.position = "absolute";
 
-  // DYNAMIC HEIGHTS + GAP
-  const gapHeight = 300; // adjust this to change difficulty
-  const totalHeight = 900; // total pipe area (top + gap + bottom)
-
+  // Heights & gap
+  const gapHeight = gap;
+  const totalHeight = 900; 
   pipeTop.style.top = "0px";
   pipeBottom.style.bottom = "0px";
 
-  // random top height between 50 and 450
   const topHeight = Math.floor(Math.random() * 400) + 50;
-
-  // bottom height = whatever is left after top + gap
   const bottomHeight = totalHeight - topHeight - gapHeight;
 
-// Apply styling
-pipeTop.style.height = topHeight + "px";
-pipeBottom.style.height = bottomHeight + "px";
-  // Start pipes offscreen right
+  pipeTop.style.height = topHeight + "px";
+  pipeBottom.style.height = bottomHeight + "px";
+
+  // Pipes start offscreen right
   pipeTop.style.left = "600px";
   pipeBottom.style.left = "600px";
-
   pipeTop.style.width = "60px";
   pipeBottom.style.width = "60px";
+
+  // PIPE END INDICATORS (caps)
+  const capHeight = 20; // taller
+  const capExtraWidth = 10; // extend beyond pipe sides
+  pipeTopEnd.style.left = (600 - capExtraWidth / 2) + "px";
+  pipeTopEnd.style.top = (topHeight - capHeight) + "px"; // bottom of top pipe
+  pipeTopEnd.style.width = (60 + capExtraWidth) + "px"; 
+  pipeTopEnd.style.height = capHeight + "px";
+  pipeTopEnd.style.background = "#228B22"; // same color as pipe
+  pipeTopEnd.style.zIndex = "5";
+
+  pipeBottomEnd.style.left = (600 - capExtraWidth / 2) + "px";
+  pipeBottomEnd.style.top = (topHeight + gapHeight) + "px"; // top of bottom pipe
+  pipeBottomEnd.style.width = (60 + capExtraWidth) + "px"; 
+  pipeBottomEnd.style.height = capHeight + "px";
+  pipeBottomEnd.style.background = "#228B22"; // same color as pipe
+  pipeBottomEnd.style.zIndex = "5";
 
   // Add to game
   game.appendChild(pipeTop);
   game.appendChild(pipeBottom);
+  game.appendChild(pipeTopEnd);
+  game.appendChild(pipeBottomEnd);
 
-  // movement variables
   let pipeX = 600;
   let scored = false;
 
   function movePipe() {
     if (gameOver) return;
 
-    // Move left
     pipeX -= 2;
     pipeTop.style.left = pipeX + "px";
     pipeBottom.style.left = pipeX + "px";
+    pipeTopEnd.style.left = (pipeX - capExtraWidth / 2) + "px";
+    pipeBottomEnd.style.left = (pipeX - capExtraWidth / 2) + "px";
 
     // Collision check
     const birdRect = bird.getBoundingClientRect();
@@ -186,20 +239,23 @@ pipeBottom.style.height = bottomHeight + "px";
       return;
     }
 
-    // Scoring (bird passes pipe)
+    // Scoring
     if (!scored && pipeX + 60 < bird.offsetLeft) {
       scored = true;
       updateScore();
     }
 
-    // Remove pipe if off screen
+    // Remove pipes if off screen
     if (pipeX + 60 > 0) {
       requestAnimationFrame(movePipe);
     } else {
       pipeTop.remove();
       pipeBottom.remove();
+      pipeTopEnd.remove();
+      pipeBottomEnd.remove();
     }
   }
 
   requestAnimationFrame(movePipe);
 }
+
