@@ -258,7 +258,7 @@ function createPipe() {
     }
 
     // Scoring
-    if (!scored && pipeX + 60 < bird.offsetLeft) {
+    if (!scored && pipeX < bird.offsetLeft) {
       scored = true;
       updateScore();
     }

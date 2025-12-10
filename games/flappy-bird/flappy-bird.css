@@ -26,7 +26,7 @@ body {
 }
 
 #bird {
-  position: absolute;
+  position: relative;
   width: 40px;
   height: 40px;
   background: yellow;
@@ -34,7 +34,7 @@ body {
   z-index: 10;
 }
 
-/* Beak */
+/* Beak sticking out of the circle */
 #bird .beak {
   position: absolute;
   width: 0;
@@ -42,43 +42,43 @@ body {
   border-top: 6px solid transparent;
   border-bottom: 6px solid transparent;
   border-left: 12px solid orange;
-  top: 50%; /* vertical center */
-  left: 100%; /* start at the right edge of the circle */
-  transform: translateY(-50%); /* adjust vertical center */
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
 }
 
-/* Eye - white part */
+/* Eye with pupil */
 #bird .eye {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   background: white;
   border-radius: 50%;
-  top: 10px;
-  left: 22px;
+  top: 25%;
+  left: 55%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Eye - pupil (black dot) */
 #bird .eye::after {
   content: "";
-  position: absolute;
   width: 4px;
   height: 4px;
   background: black;
   border-radius: 50%;
-  top: 2px;
-  left: 2px;
+  display: block;
 }
 
-/* Wing */
+/* Wing as a small curved shape */
 #bird .wing {
   position: absolute;
   width: 16px;
-  height: 10px;
+  height: 16px;
   background: orange;
-  border-radius: 50%;
-  top: 20px;
-  left: 10px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; /* gives a small wing curve */
+  top: 40%;
+  left: 20%;
   transform: rotate(-30deg);
 }
 
