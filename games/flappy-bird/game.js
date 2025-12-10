@@ -28,7 +28,7 @@ function startGame() {
   promptDiv.style.display = "none";
   // Start pipe interval
   if (window.pipeInterval) clearInterval(window.pipeInterval);
-  window.pipeInterval = setInterval(createPipe, 1800);
+  window.pipeInterval = setInterval(createPipe, 2500);
 }
 
 function endGame() {
@@ -117,46 +117,89 @@ function gameLoop() {
 }
 
 function createPipe() {
+  const game = document.getElementById("game");
+
+  // Create elements
   const pipeTop = document.createElement("div");
   const pipeBottom = document.createElement("div");
   pipeTop.className = "pipe pipe-top";
   pipeBottom.className = "pipe pipe-bottom";
+  pipeTop.style.position = "absolute";
+  pipeBottom.style.position = "absolute";
 
-  // Fixed gap and pipe heights
-  const gapHeight = 200;
-  const topHeight = 300;
-  const bottomHeight = 400;
+  // DYNAMIC HEIGHTS + GAP
+  const gapHeight = 300; // adjust this to change difficulty
+  const totalHeight = 900; // total pipe area (top + gap + bottom)
 
-  pipeTop.style.height = topHeight + "px";
-  pipeBottom.style.height = bottomHeight + "px";
   pipeTop.style.top = "0px";
   pipeBottom.style.bottom = "0px";
-  pipeTop.style.right = "-60px";
-  pipeBottom.style.right = "-60px";
+
+  // random top height between 50 and 450
+  const topHeight = Math.floor(Math.random() * 400) + 50;
+
+  // bottom height = whatever is left after top + gap
+  const bottomHeight = totalHeight - topHeight - gapHeight;
+
+// Apply styling
+pipeTop.style.height = topHeight + "px";
+pipeBottom.style.height = bottomHeight + "px";
+  // Start pipes offscreen right
+  pipeTop.style.left = "600px";
+  pipeBottom.style.left = "600px";
+
   pipeTop.style.width = "60px";
   pipeBottom.style.width = "60px";
 
-  document.getElementById("game").appendChild(pipeTop);
-  document.getElementById("game").appendChild(pipeBottom);
+  // Add to game
+  game.appendChild(pipeTop);
+  game.appendChild(pipeBottom);
 
-  let pipeX = -60;
+  // movement variables
+  let pipeX = 600;
   let scored = false;
+
   function movePipe() {
     if (gameOver) return;
-    pipeX += 2;
-    pipeTop.style.right = pipeX + "px";
-    pipeBottom.style.right = pipeX + "px";
-    // Scoring: when pipe passes bird's left edge
-    if (!scored && pipeX > (600 - 75 - 60)) {
+
+    // Move left
+    pipeX -= 2;
+    pipeTop.style.left = pipeX + "px";
+    pipeBottom.style.left = pipeX + "px";
+
+    // Collision check
+    const birdRect = bird.getBoundingClientRect();
+    const topRect = pipeTop.getBoundingClientRect();
+    const bottomRect = pipeBottom.getBoundingClientRect();
+
+    const hitTop =
+      birdRect.right > topRect.left &&
+      birdRect.left < topRect.right &&
+      birdRect.top < topRect.bottom;
+
+    const hitBottom =
+      birdRect.right > bottomRect.left &&
+      birdRect.left < bottomRect.right &&
+      birdRect.bottom > bottomRect.top;
+
+    if (hitTop || hitBottom) {
+      endGame();
+      return;
+    }
+
+    // Scoring (bird passes pipe)
+    if (!scored && pipeX + 60 < bird.offsetLeft) {
       scored = true;
       updateScore();
     }
-    if (pipeX < 600) {
+
+    // Remove pipe if off screen
+    if (pipeX + 60 > 0) {
       requestAnimationFrame(movePipe);
     } else {
       pipeTop.remove();
       pipeBottom.remove();
     }
   }
+
   requestAnimationFrame(movePipe);
 }
