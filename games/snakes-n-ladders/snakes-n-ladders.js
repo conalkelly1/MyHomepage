@@ -84,8 +84,8 @@ function generateLadders() {
   while (ladders.length < numLadders && attempts < 200) {
     attempts++;
 
-    // Pick a start square between 1 and 90 (to allow space for ladder)
-    let start = Math.floor(Math.random() * 90) + 1;
+    // Pick a start square between 2 and 90 (to allow space for ladder)
+    let start = Math.floor(Math.random() * 89) + 2; // 2 → 90
 
     // Random ladder length 10–40
     const length = Math.floor(Math.random() * (40 - 10 + 1)) + 10;
@@ -114,32 +114,58 @@ function generateLadders() {
 }
 
 function drawLadders() {
-  ladders.forEach(ladder => {
-    const startCoords = getSquareCoordinates(ladder.start);
-    const endCoords = getSquareCoordinates(ladder.end);
-
-    ctx.strokeStyle = "green";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(startCoords.x, startCoords.y);
-    ctx.lineTo(endCoords.x, endCoords.y);
-    ctx.stroke();
-  });
-}
-
-function drawLadders() {
-  ctx.strokeStyle = "green"; // color of ladders
-  ctx.lineWidth = 4; // thickness of ladder
+  const ladderWidth = 10; // distance between the 2 rails
+  const railCount = 2;
+  const rungSpacing = 15;
 
   ladders.forEach(ladder => {
-    const startCoords = getSquareCoordinates(ladder.start);
-    const endCoords = getSquareCoordinates(ladder.end);
+    // Get the center coordinates of start and end squares
+    const start = getSquareCoordinates(ladder.start);
+    const end = getSquareCoordinates(ladder.end);
 
-    // draw a line from start to end
-    ctx.beginPath();
-    ctx.moveTo(startCoords.x, startCoords.y);
-    ctx.lineTo(endCoords.x, endCoords.y);
-    ctx.stroke();
+    // Vector from start to end
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const length = Math.sqrt(dx*dx + dy*dy);
+    const ux = dx / length;
+    const uy = dy / length;
+
+    // Perpendicular vector for rail width
+    const px = -uy * (ladderWidth / 2);
+    const py = ux * (ladderWidth / 2);
+
+    // Draw rails
+    for (let i = 0; i < railCount; i++) {
+      const t = i / (railCount - 1);
+      const offsetX = px * (1 - 2 * t);
+      const offsetY = py * (1 - 2 * t);
+
+      ctx.beginPath();
+      ctx.moveTo(start.x + offsetX, start.y + offsetY);
+      ctx.lineTo(end.x + offsetX, end.y + offsetY);
+      ctx.strokeStyle = "green";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    // Dynamic rung count based on ladder length
+    const rungCount = Math.max(2, Math.floor(length / rungSpacing));
+
+    // Draw rungs, centered inside the squares
+    for (let i = 1; i < rungCount; i++) {
+      const t = i / rungCount;
+      const rungStartX = start.x + dx * t + px;
+      const rungStartY = start.y + dy * t + py;
+      const rungEndX = start.x + dx * t - px;
+      const rungEndY = start.y + dy * t - py;
+
+      ctx.beginPath();
+      ctx.moveTo(rungStartX, rungStartY);
+      ctx.lineTo(rungEndX, rungEndY);
+      ctx.strokeStyle = "green";
+      ctx.lineWidth = 2; // optional: thinner rungs
+      ctx.stroke();
+    }
   });
 }
 
