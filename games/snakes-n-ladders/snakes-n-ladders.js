@@ -1,6 +1,6 @@
 const canvas = document.getElementById("boardCanvas");
 const ctx = canvas.getContext("2d");
-const boardSize = 10; // 10x10
+const boardSize = 10;
 let squareSize;
 
 const turnDisplay = document.getElementById("turnDisplay");
@@ -9,25 +9,22 @@ const rollDiceBtn = document.getElementById("rollDice");
 
 const playerColors = ["red", "blue", "green", "orange", "purple", "yellow"];
 let players = [];
-let currentPlayer = 0; // index of current player
+let currentPlayer = 0;
 
 let ladders = [];
+let snakes = [];
 
 // Ask user for number of players (1-6)
 let numPlayers = parseInt(prompt("Enter number of players (1-6):"));
 if (isNaN(numPlayers) || numPlayers < 1) numPlayers = 2;
 if (numPlayers > 6) numPlayers = 6;
 
-// Create player objects
+// Create players
 for (let i = 0; i < numPlayers; i++) {
-  players.push({
-    name: `Player ${i + 1}`,
-    position: 1,
-    color: playerColors[i]
-  });
+  players.push({ name: `Player ${i + 1}`, position: 1, color: playerColors[i] });
 }
 
-// resize canvas to fit container
+// Resize canvas
 function resizeCanvas() {
   const container = document.getElementById("game-container");
   const containerWidth = container.clientWidth * 0.66;
@@ -38,13 +35,84 @@ function resizeCanvas() {
   canvas.height = size;
   squareSize = size / boardSize;
 
-  generateLadders();
+  generateBoardObjects();
   drawBoard();
   drawLadders();
+  drawSnakes();
   drawPlayers();
 }
 
-// Draw numbered squares
+// Generate ladders and snakes safely
+function generateBoardObjects() {
+  ladders = [];
+  snakes = [];
+  const occupiedPositions = new Set();
+
+  // --- Special snake from 99 ---
+  const specialLength = Math.floor(Math.random() * (80 - 40 + 1)) + 40;
+  const specialEnd = 99 - specialLength;
+  snakes.push({ start: 99, end: specialEnd });
+  occupiedPositions.add(99);
+  occupiedPositions.add(specialEnd);
+
+  // --- Ladders with controlled start/end zones ---
+  const ladderStartZones = [
+    { count: 1, min: 1, max: 20 },
+    { count: 2, min: 30, max: 40 },
+    { count: 2, min: 50, max: 60 }
+  ];
+
+  const usedEndBands = new Set(); // To prevent ladders ending in same band
+
+  ladderStartZones.forEach(zone => {
+    for (let i = 0; i < zone.count; i++) {
+      let attempts = 0;
+      while (attempts < 200) {
+        attempts++;
+        const start = Math.floor(Math.random() * (zone.max - zone.min + 1)) + zone.min;
+        if (occupiedPositions.has(start)) continue;
+
+        // Determine end band: divide board into 10 bands (1-10, 11-20, ..., 91-100)
+        const bandOptions = Array.from({ length: 10 }, (_, b) => b + 1)
+          .filter(b => !usedEndBands.has(b) && b * 10 >= start + 10); // must be above start
+
+        if (bandOptions.length === 0) break; // no free end bands
+        const chosenBand = bandOptions[Math.floor(Math.random() * bandOptions.length)];
+        const endMin = Math.max(start + 10, (chosenBand - 1) * 10 + 1);
+        const endMax = Math.min(start + 40, chosenBand * 10);
+        if (endMin > endMax) continue;
+        const end = Math.floor(Math.random() * (endMax - endMin + 1)) + endMin;
+
+        ladders.push({ start, end });
+        occupiedPositions.add(start);
+        occupiedPositions.add(end);
+        usedEndBands.add(chosenBand);
+        break;
+      }
+    }
+  });
+
+  // --- Additional snakes (4–5 total including special) ---
+  const totalSnakes = Math.floor(Math.random() * 2) + 4;
+  const snakeAttemptsMax = 500;
+  let snakeAttempts = 0;
+
+  while (snakes.length < totalSnakes && snakeAttempts < snakeAttemptsMax) {
+    snakeAttempts++;
+    const start = Math.floor(Math.random() * 80) + 11;
+    const length = Math.floor(Math.random() * (40 - 10 + 1)) + 10;
+    const end = start - length;
+    if (end <= 0) continue;
+    if (occupiedPositions.has(start) || occupiedPositions.has(end)) continue;
+    if (ladders.some(l => l.start === start || l.end === start || l.start === end || l.end === end)) continue;
+
+    snakes.push({ start, end });
+    occupiedPositions.add(start);
+    occupiedPositions.add(end);
+  }
+}
+
+// Draw board
 function drawBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "#333";
@@ -71,70 +139,22 @@ function drawBoard() {
   }
 }
 
-// Draw all players
-function drawPlayers() {
-  players.forEach(drawToken);
-}
-
-function generateLadders() {
-  ladders = []; // reset every time
-  const numLadders = Math.floor(Math.random() * (13 - 8 + 1)) + 8; // 8–13 ladders
-
-  let attempts = 0;
-  while (ladders.length < numLadders && attempts < 200) {
-    attempts++;
-
-    // Pick a start square between 2 and 90 (to allow space for ladder)
-    let start = Math.floor(Math.random() * 89) + 2; // 2 → 90
-
-    // Random ladder length 10–40
-    const length = Math.floor(Math.random() * (40 - 10 + 1)) + 10;
-    let end = start + length;
-
-    // Check constraints:
-    const bottomLadder = start <= 10;
-    const topLadder = end >= 91;
-
-    const conflict = ladders.some(l =>
-      Math.abs(l.start - start) < 5 || // 5-square buffer between starts
-      Math.abs(l.end - end) < 5 ||     // 5-square buffer between ends
-      l.start === end ||               // no ladder starting where another ends
-      l.end === start                  // no ladder ending where another starts
-    );
-
-    const bottomExists = ladders.some(l => l.start <= 10);
-    const topExists = ladders.some(l => l.end >= 91);
-
-    if (!conflict && (!bottomLadder || !bottomExists) && (!topLadder || !topExists)) {
-      ladders.push({ start, end });
-    }
-  }
-
-  console.log(ladders);
-}
-
+// Draw ladders
 function drawLadders() {
-  const ladderWidth = 10; // distance between the 2 rails
+  const ladderWidth = 10;
   const railCount = 2;
   const rungSpacing = 15;
 
   ladders.forEach(ladder => {
-    // Get the center coordinates of start and end squares
     const start = getSquareCoordinates(ladder.start);
     const end = getSquareCoordinates(ladder.end);
 
-    // Vector from start to end
     const dx = end.x - start.x;
     const dy = end.y - start.y;
-    const length = Math.sqrt(dx*dx + dy*dy);
-    const ux = dx / length;
-    const uy = dy / length;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const px = -dy / length * (ladderWidth / 2);
+    const py = dx / length * (ladderWidth / 2);
 
-    // Perpendicular vector for rail width
-    const px = -uy * (ladderWidth / 2);
-    const py = ux * (ladderWidth / 2);
-
-    // Draw rails
     for (let i = 0; i < railCount; i++) {
       const t = i / (railCount - 1);
       const offsetX = px * (1 - 2 * t);
@@ -148,10 +168,7 @@ function drawLadders() {
       ctx.stroke();
     }
 
-    // Dynamic rung count based on ladder length
     const rungCount = Math.max(2, Math.floor(length / rungSpacing));
-
-    // Draw rungs, centered inside the squares
     for (let i = 1; i < rungCount; i++) {
       const t = i / rungCount;
       const rungStartX = start.x + dx * t + px;
@@ -163,20 +180,47 @@ function drawLadders() {
       ctx.moveTo(rungStartX, rungStartY);
       ctx.lineTo(rungEndX, rungEndY);
       ctx.strokeStyle = "green";
-      ctx.lineWidth = 2; // optional: thinner rungs
+      ctx.lineWidth = 2;
       ctx.stroke();
     }
   });
 }
 
-// Draw single token
+// Draw snakes
+function drawSnakes() {
+  snakes.forEach(snake => {
+    const start = getSquareCoordinates(snake.start);
+    const end = getSquareCoordinates(snake.end);
+
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = squareSize / 12;
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
+
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(start.x, start.y, squareSize / 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+}
+
+// Draw players
+function drawPlayers() {
+  players.forEach(drawToken);
+}
+
 function drawToken(player) {
   const { x, y } = getSquareCoordinates(player.position);
-  const tokenRadius = squareSize / 6; // smaller so multiple tokens fit
-  const offset = tokenRadius * 2; // space tokens apart if multiple
+  const tokenRadius = squareSize / 6;
+  const offset = tokenRadius * 2;
 
   const index = players.indexOf(player);
-  const colOffset = (index % 2) * offset - offset / 2; // 2 per row max
+  const colOffset = (index % 2) * offset - offset / 2;
   const rowOffset = Math.floor(index / 2) * offset - offset / 2;
 
   ctx.beginPath();
@@ -187,7 +231,7 @@ function drawToken(player) {
   ctx.stroke();
 }
 
-// Convert board position to canvas coordinates
+// Convert position to canvas coordinates
 function getSquareCoordinates(position) {
   const row = Math.floor((position - 1) / 10);
   const col = (row % 2 === 0)
@@ -204,15 +248,15 @@ rollDiceBtn.addEventListener("click", () => {
   const roll = Math.floor(Math.random() * 6) + 1;
   diceResult.textContent = "Dice: " + roll;
 
-  // Move current player
-  let player = players[currentPlayer];
+  const player = players[currentPlayer];
   player.position += roll;
   if (player.position > 100) player.position = 100;
 
   drawBoard();
+  drawLadders();
+  drawSnakes();
   drawPlayers();
 
-  // Next player's turn
   currentPlayer = (currentPlayer + 1) % players.length;
   turnDisplay.textContent = players[currentPlayer].name + "'s turn";
 });
@@ -220,5 +264,4 @@ rollDiceBtn.addEventListener("click", () => {
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
-// Initialize turn display
 turnDisplay.textContent = players[currentPlayer].name + "'s turn";
