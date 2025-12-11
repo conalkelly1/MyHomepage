@@ -1,0 +1,36 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  background-color: whitesmoke;
+}
+
+#game-container {
+  display: flex;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
+#boardCanvas {
+  flex: 2;
+  border: 2px solid #333;
+  background-color: #eee;
+}
+
+#side-panel {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+#rollDice {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
